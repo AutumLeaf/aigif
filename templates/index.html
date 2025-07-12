@@ -1,0 +1,471 @@
+{% extends "base.html" %}
+
+{% block title %}AI GIF Generator - Transform Videos into Expressive GIFs{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 text-center mb-4">
+        <h1 class="display-4 fw-bold text-primary">
+            <i class="fas fa-magic"></i> AI GIF Generator
+        </h1>
+        <p class="lead">Transform your videos into expressive, captioned GIFs with AI-powered scene detection</p>
+    </div>
+</div>
+
+<div id="alert-container"></div>
+
+<!-- Upload Section -->
+<div class="row" id="upload-section">
+    <div class="col-12">
+        <form id="upload-form" enctype="multipart/form-data">
+            <!-- Video Upload Area -->
+            <div class="upload-area" id="upload-area">
+                <div id="upload-content">
+                    <i class="fas fa-cloud-upload-alt fa-4x text-primary mb-3"></i>
+                    <h3>Drop your video here</h3>
+                    <p class="text-muted">or click to select a file</p>
+                    <p class="small text-muted">
+                        Supported formats: MP4, AVI, MOV, WMV, FLV, WebM, MKV<br>
+                        Maximum size: 100MB
+                    </p>
+                    <input type="file" id="video-input" name="video" accept="video/*" style="display: none;">
+                </div>
+                
+                <div id="file-info" style="display: none;">
+                    <i class="fas fa-video fa-2x text-success mb-2"></i>
+                    <h5 id="file-name"></h5>
+                    <p id="file-size" class="text-muted"></p>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="change-file">
+                        <i class="fas fa-edit"></i> Change File
+                    </button>
+                </div>
+            </div>
+
+            <!-- Prompt Input -->
+            <div class="mt-4">
+                <label for="prompt" class="form-label">
+                    <i class="fas fa-lightbulb text-warning"></i> 
+                    What kind of moments do you want to capture?
+                </label>
+                <textarea 
+                    class="form-control" 
+                    id="prompt" 
+                    name="prompt" 
+                    rows="3" 
+                    placeholder="Describe what you're looking for... (e.g., 'Find exciting action moments', 'Show funny reactions', 'Capture emotional scenes')"
+                    required></textarea>
+                <div class="form-text">
+                    <i class="fas fa-info-circle"></i> 
+                    Be specific about emotions, actions, or visual elements you want to highlight.
+                </div>
+            </div>
+
+            <!-- Quick Suggestions -->
+            <div class="mt-3">
+                <p class="small text-muted mb-2">Quick suggestions:</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-outline-info btn-sm suggestion-btn">Find exciting action moments</button>
+                    <button type="button" class="btn btn-outline-info btn-sm suggestion-btn">Show funny reactions</button>
+                    <button type="button" class="btn btn-outline-info btn-sm suggestion-btn">Capture emotional scenes</button>
+                    <button type="button" class="btn btn-outline-info btn-sm suggestion-btn">Find dramatic moments</button>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
+                    <i class="fas fa-magic"></i> Generate AI GIF
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Processing Section -->
+<div class="row" id="processing-section" style="display: none;">
+    <div class="col-12 text-center">
+        <div class="spinner-border text-primary mb-3" role="status">
+            <span class="visually-hidden">Processing...</span>
+        </div>
+        <h3 id="processing-status">Analyzing your video...</h3>
+        <p class="text-muted" id="processing-detail">This may take a few moments</p>
+        
+        <div class="progress mt-3">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                 role="progressbar" 
+                 style="width: 0%" 
+                 id="progress-bar">
+            </div>
+        </div>
+        
+        <div class="mt-3">
+            <p class="small text-muted">
+                <i class="fas fa-cog fa-spin"></i> 
+                Processing steps: Video analysis → Scene detection → AI matching → GIF generation
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Results Section -->
+<div class="row" id="results-section" style="display: none;">
+    <div class="col-12">
+        <div class="text-center mb-4">
+            <h2 class="text-success">
+                <i class="fas fa-check-circle"></i> Your AI GIF is Ready!
+            </h2>
+        </div>
+        
+        <!-- GIF Preview -->
+        <div class="text-center mb-4">
+            <div id="gif-preview"></div>
+        </div>
+        
+        <!-- Download Actions -->
+        <div class="text-center mb-4">
+            <a href="#" class="btn btn-primary btn-lg me-2" id="download-btn">
+                <i class="fas fa-download"></i> Download GIF
+            </a>
+            <button type="button" class="btn btn-secondary btn-lg" id="create-another-btn">
+                <i class="fas fa-plus"></i> Create Another
+            </button>
+        </div>
+        
+        <!-- Processing Details -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle"></i> Processing Details
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row" id="processing-stats">
+                    <!-- Will be populated with results -->
+                </div>
+                
+                <div class="mt-3">
+                    <h6><i class="fas fa-film"></i> Selected Scenes</h6>
+                    <div id="scene-details">
+                        <!-- Will be populated with scene information -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Example Section -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="text-center mb-4">
+            <h3><i class="fas fa-lightbulb"></i> Need Inspiration?</h3>
+            <p class="text-muted">Check out our example prompts to get started</p>
+            <a href="{{ url_for('examples') }}" class="btn btn-outline-primary">
+                <i class="fas fa-eye"></i> View Examples
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Elements
+    const uploadArea = document.getElementById('upload-area');
+    const videoInput = document.getElementById('video-input');
+    const uploadForm = document.getElementById('upload-form');
+    const promptInput = document.getElementById('prompt');
+    const submitBtn = document.getElementById('submit-btn');
+    const changeFileBtn = document.getElementById('change-file');
+    const createAnotherBtn = document.getElementById('create-another-btn');
+    
+    // Sections
+    const uploadSection = document.getElementById('upload-section');
+    const processingSection = document.getElementById('processing-section');
+    const resultsSection = document.getElementById('results-section');
+    
+    // File info elements
+    const uploadContent = document.getElementById('upload-content');
+    const fileInfo = document.getElementById('file-info');
+    const fileName = document.getElementById('file-name');
+    const fileSize = document.getElementById('file-size');
+    
+    // Processing elements
+    const processingStatus = document.getElementById('processing-status');
+    const processingDetail = document.getElementById('processing-detail');
+    const progressBar = document.getElementById('progress-bar');
+    
+    let selectedFile = null;
+    let processingInterval = null;
+    
+    // Drag and drop functionality
+    uploadArea.addEventListener('click', () => {
+        videoInput.click();
+    });
+    
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFileSelection(files[0]);
+        }
+    });
+    
+    videoInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleFileSelection(e.target.files[0]);
+        }
+    });
+    
+    function handleFileSelection(file) {
+        // Validate file type
+        const allowedTypes = ['video/mp4', 'video/avi', 'video/mov', 'video/wmv', 'video/flv', 'video/webm', 'video/mkv'];
+        if (!allowedTypes.includes(file.type)) {
+            showAlert('Please select a valid video file', 'danger');
+            return;
+        }
+        
+        // Validate file size (100MB)
+        if (file.size > 100 * 1024 * 1024) {
+            showAlert('File size must be less than 100MB', 'danger');
+            return;
+        }
+        
+        selectedFile = file;
+        
+        // Update UI
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        
+        uploadContent.style.display = 'none';
+        fileInfo.style.display = 'block';
+        
+        // Enable submit button if prompt is filled
+        updateSubmitButton();
+    }
+    
+    // Change file button
+    changeFileBtn.addEventListener('click', () => {
+        selectedFile = null;
+        videoInput.value = '';
+        
+        uploadContent.style.display = 'block';
+        fileInfo.style.display = 'none';
+        
+        updateSubmitButton();
+    });
+    
+    // Prompt input
+    promptInput.addEventListener('input', updateSubmitButton);
+    
+    function updateSubmitButton() {
+        const hasFile = selectedFile !== null;
+        const hasPrompt = promptInput.value.trim() !== '';
+        
+        submitBtn.disabled = !(hasFile && hasPrompt);
+    }
+    
+    // Suggestion buttons
+    document.querySelectorAll('.suggestion-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            promptInput.value = btn.textContent;
+            updateSubmitButton();
+        });
+    });
+    
+    // Form submission
+    uploadForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        if (!selectedFile) {
+            showAlert('Please select a video file', 'danger');
+            return;
+        }
+        
+        if (!promptInput.value.trim()) {
+            showAlert('Please enter a prompt', 'danger');
+            return;
+        }
+        
+        // Switch to processing view
+        uploadSection.style.display = 'none';
+        processingSection.style.display = 'block';
+        
+        // Start processing animation
+        startProcessingAnimation();
+        
+        // Create form data
+        const formData = new FormData();
+        formData.append('video', selectedFile);
+        formData.append('prompt', promptInput.value.trim());
+        
+        try {
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+                displayResults(result);
+            } else {
+                throw new Error(result.error || 'Processing failed');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert(`Error: ${error.message}`, 'danger');
+            
+            // Return to upload view
+            processingSection.style.display = 'none';
+            uploadSection.style.display = 'block';
+        }
+        
+        stopProcessingAnimation();
+    });
+    
+    function startProcessingAnimation() {
+        let progress = 0;
+        const steps = [
+            { text: 'Analyzing video content...', detail: 'Extracting frames and detecting scenes' },
+            { text: 'Understanding your prompt...', detail: 'Using AI to interpret your request' },
+            { text: 'Matching scenes to prompt...', detail: 'Finding the most relevant moments' },
+            { text: 'Generating your GIF...', detail: 'Creating the final animated GIF' }
+        ];
+        
+        let currentStep = 0;
+        
+        processingInterval = setInterval(() => {
+            progress += Math.random() * 10 + 5;
+            
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(processingInterval);
+            }
+            
+            // Update progress bar
+            progressBar.style.width = `${progress}%`;
+            
+            // Update step
+            if (currentStep < steps.length && progress > (currentStep + 1) * 25) {
+                currentStep++;
+                if (currentStep < steps.length) {
+                    processingStatus.textContent = steps[currentStep].text;
+                    processingDetail.textContent = steps[currentStep].detail;
+                }
+            }
+        }, 500);
+    }
+    
+    function stopProcessingAnimation() {
+        if (processingInterval) {
+            clearInterval(processingInterval);
+            processingInterval = null;
+        }
+        
+        progressBar.style.width = '100%';
+    }
+    
+    function displayResults(result) {
+        // Hide processing section
+        processingSection.style.display = 'none';
+        
+        // Show results section
+        resultsSection.style.display = 'block';
+        
+        // Display GIF
+        const gifPreview = document.getElementById('gif-preview');
+        gifPreview.innerHTML = `
+            <img src="/preview/${result.gif_path.split('/').pop()}" 
+                 alt="Generated GIF" 
+                 class="result-gif">
+        `;
+        
+        // Set download link
+        const downloadBtn = document.getElementById('download-btn');
+        downloadBtn.href = result.download_url;
+        
+        // Display processing stats
+        const processingStats = document.getElementById('processing-stats');
+        processingStats.innerHTML = `
+            <div class="col-md-3">
+                <div class="text-center">
+                    <h4 class="text-primary">${result.total_scenes_analyzed}</h4>
+                    <p class="text-muted small">Scenes Analyzed</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <h4 class="text-success">${result.matched_scenes}</h4>
+                    <p class="text-muted small">Scenes Matched</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <h4 class="text-warning">${result.selected_scenes}</h4>
+                    <p class="text-muted small">Scenes Selected</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <h4 class="text-info">${result.user_prompt.split(' ').length}</h4>
+                    <p class="text-muted small">Prompt Words</p>
+                </div>
+            </div>
+        `;
+        
+        // Display scene details
+        const sceneDetails = document.getElementById('scene-details');
+        sceneDetails.innerHTML = result.scene_details.map((scene, index) => `
+            <div class="scene-info">
+                <h6><i class="fas fa-play"></i> Scene ${index + 1}</h6>
+                <p><strong>Duration:</strong> ${formatDuration(scene.duration)}</p>
+                <p><strong>Timeframe:</strong> ${formatDuration(scene.start_time)} - ${formatDuration(scene.end_time)}</p>
+                <p><strong>Relevance:</strong> ${Math.round(scene.relevance_score * 100)}%</p>
+                <p><strong>Reason:</strong> ${scene.match_reason}</p>
+                ${scene.suggested_caption ? `<p><strong>Caption:</strong> ${scene.suggested_caption}</p>` : ''}
+            </div>
+        `).join('');
+        
+        // Scroll to results
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Create another button
+    createAnotherBtn.addEventListener('click', () => {
+        // Reset everything
+        selectedFile = null;
+        videoInput.value = '';
+        promptInput.value = '';
+        
+        uploadContent.style.display = 'block';
+        fileInfo.style.display = 'none';
+        
+        // Show upload section
+        uploadSection.style.display = 'block';
+        processingSection.style.display = 'none';
+        resultsSection.style.display = 'none';
+        
+        updateSubmitButton();
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    
+    // Initialize
+    updateSubmitButton();
+});
+</script>
+{% endblock %}
