@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Examples - AI GIF Generator{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary">
+            <i class="fas fa-lightbulb"></i> Prompt Examples
+        </h1>
+        <p class="lead">Get inspired with these example prompts for creating amazing AI-powered GIFs</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            <strong>Pro Tip:</strong> The more specific your prompt, the better the AI can understand what you're looking for. 
+            Describe emotions, actions, visual elements, or specific moments you want to capture.
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% for example in examples %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-quote-left text-primary"></i>
+                    {{ example.prompt }}
+                </h5>
+                <p class="card-text">{{ example.description }}</p>
+                <button class="btn btn-outline-primary btn-sm copy-prompt" data-prompt="{{ example.prompt }}">
+                    <i class="fas fa-copy"></i> Use This Prompt
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-magic"></i> Advanced Prompt Techniques
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-eye"></i> Visual Elements</h6>
+                        <ul class="list-unstyled">
+                            <li>• "Find scenes with bright, vibrant colors"</li>
+                            <li>• "Show moments with dramatic lighting"</li>
+                            <li>• "Capture close-up facial expressions"</li>
+                            <li>• "Find wide shots showing the full scene"</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-running"></i> Motion & Action</h6>
+                        <ul class="list-unstyled">
+                            <li>• "Extract high-speed action sequences"</li>
+                            <li>• "Show gentle, flowing movements"</li>
+                            <li>• "Find moments of sudden motion"</li>
+                            <li>• "Capture rhythmic or repetitive actions"</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-heart"></i> Emotions & Mood</h6>
+                        <ul class="list-unstyled">
+                            <li>• "Show moments of joy and celebration"</li>
+                            <li>• "Find tense or suspenseful scenes"</li>
+                            <li>• "Capture peaceful, relaxing moments"</li>
+                            <li>• "Show surprise or shock reactions"</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-clock"></i> Timing & Pacing</h6>
+                        <ul class="list-unstyled">
+                            <li>• "Find brief, impactful moments"</li>
+                            <li>• "Show extended, flowing sequences"</li>
+                            <li>• "Capture the climax or peak moments"</li>
+                            <li>• "Find subtle, quiet interactions"</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-question-circle"></i> How It Works
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 text-center mb-3">
+                        <div class="mb-3">
+                            <i class="fas fa-video fa-3x text-primary"></i>
+                        </div>
+                        <h6>1. Video Analysis</h6>
+                        <p class="small text-muted">AI analyzes your video to detect scenes, motion, colors, and visual features</p>
+                    </div>
+                    <div class="col-md-3 text-center mb-3">
+                        <div class="mb-3">
+                            <i class="fas fa-brain fa-3x text-success"></i>
+                        </div>
+                        <h6>2. Prompt Understanding</h6>
+                        <p class="small text-muted">Advanced AI interprets your prompt to understand what you're looking for</p>
+                    </div>
+                    <div class="col-md-3 text-center mb-3">
+                        <div class="mb-3">
+                            <i class="fas fa-search fa-3x text-warning"></i>
+                        </div>
+                        <h6>3. Scene Matching</h6>
+                        <p class="small text-muted">AI matches video scenes to your prompt based on relevance and quality</p>
+                    </div>
+                    <div class="col-md-3 text-center mb-3">
+                        <div class="mb-3">
+                            <i class="fas fa-file-image fa-3x text-info"></i>
+                        </div>
+                        <h6>4. GIF Generation</h6>
+                        <p class="small text-muted">Selected scenes are combined into a smooth, optimized GIF</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-12 text-center">
+        <h3><i class="fas fa-rocket"></i> Ready to Create?</h3>
+        <p class="text-muted">Use these examples as inspiration and create your own AI-powered GIF</p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-magic"></i> Start Creating
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Copy prompt functionality
+    document.querySelectorAll('.copy-prompt').forEach(button => {
+        button.addEventListener('click', function() {
+            const prompt = this.getAttribute('data-prompt');
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(prompt).then(() => {
+                // Update button text temporarily
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                this.classList.remove('btn-outline-primary');
+                this.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    this.classList.remove('btn-success');
+                    this.classList.add('btn-outline-primary');
+                }, 2000);
+                
+                // Show success message
+                showAlert('Prompt copied to clipboard! Now go create your GIF.', 'success');
+            }).catch(err => {
+                console.error('Failed to copy prompt:', err);
+                showAlert('Failed to copy prompt. Please try again.', 'danger');
+            });
+        });
+    });
+    
+    // Animate cards on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+    
+    // Observe all cards
+    document.querySelectorAll('.card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(card);
+    });
+});
+</script>
+{% endblock %}
